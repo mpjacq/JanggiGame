@@ -1,5 +1,4 @@
-# Author: Madeline Ford (Jacques)
-# Date: 03/05/2021
+# Author: Madeline Jacques
 # Description: This program contains an implementation of Janggi, a Korean variant
 # of chess. The JanggiGame class is where the game is essentially played, and contains
 # the way to initialize a new game, keep track of pieces on the board, make moves,
@@ -340,6 +339,7 @@ class JanggiGame():
         # If the General is threatened, threats_list will return a non-empty list
         if len(threats) > 0:
             return True
+
         else:
             return False
 
@@ -677,6 +677,10 @@ class JanggiGame():
         opposing team's General has been put into checkmate as a result of the move,
         and will update the game state to RED_WON or BLUE_WON if this is the case."""
 
+        # Do not allow a move if a player has already won
+        if self.get_game_state() != "UNFINISHED":
+            return "Game over!"
+        
         start_pos = self.translate_to_list_coords(pos1)
         start_row = start_pos[0]
         start_col = start_pos[1]
@@ -701,22 +705,30 @@ class JanggiGame():
 
         # If a valid move is available, check_move will return a list
         if type(check_move_result) != list and check_move_result != "PASS":
+            
+            # Return contents of msg from check_move_result to display to screen 
             return check_move_result
 
         # If the result was a pass, just change the turn.
         # ONLY if it doesn't put/leave current team's General in check
         if check_move_result == "PASS" and self.is_in_check(color) is False:
+            
+            # Get current turn
             prev_turn = self.get_turn()
 
+            # Translate to full word for screen display message
             if prev_turn == "B":
                 prev_turn = "Blue"
             else:
                 prev_turn = "Red"
 
+            # Change the game's turn ingo
             self.change_turn()
 
+            # Deliver confirmation message
             return f"{prev_turn} has passed on their turn."
 
+        # Cannot pass if General is in check
         elif check_move_result == "PASS" and self.is_in_check(color) is True:
             return "You may not pass when the General is in check."
 
@@ -738,6 +750,7 @@ class JanggiGame():
         # update the end piece's pos attribute to avoid any confusion
         if type(end_piece) != NoPiece:
             end_piece.set_pos('CAPTURED')
+        
         self.get_board()[start_row][start_col] = NoPiece(pos1)
 
         # With the pieces moved, check if the current team's general has been placed in check
@@ -767,8 +780,11 @@ class JanggiGame():
 
         # If no checkmate - game can go on
         else:
-            # Change which team's turn it is before returning
+
+            # Change which team's turn it is
             self.change_turn()
+
+            # Return confirmation message
             return f"Move from {pos1} to {pos2} completed."
 
     def translate_to_alg_coords(self, list_pos):
