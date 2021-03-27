@@ -814,19 +814,31 @@ class JanggiGame():
         print(header)
 
         for i in range(len(self.get_board())):
+
             row_print = ""
+
             if i <= 8:
                 row_print = f"[{i + 1} ] "
+
             else:
                 row_print = f"[{i + 1}] "
+
             for j in range(len(self.get_board()[i])):
                 row_print += str(self.get_board()[i][j]) + " "
+
             print(row_print)
 
     def draw_pieces(self, win):
+        """Displays pieces on the PyGame window/GUI according to the current
+        state/layout of the board."""
+
         for row in range(0, 10):
+            
             for col in range(0, 9):
+                
                 piece = self.get_board()[row][col]
+                
+                # Only display for occupied spaces
                 if type(piece) != NoPiece:
                     piece.draw(win)
 
@@ -835,29 +847,40 @@ class JanggiGame():
         displays moves if the color of the piece clicked matches which team's
         turn it is."""
 
+        # Do not display if a blank space or opposite team piece is clicked
         if type(selected_piece) == NoPiece or selected_piece.get_color() != self.get_turn():
             return
 
         else:
+
+            # possible_moves returns list of paths piece could take from
+            # their current position in format [ [sq, sq, sq], [sq, sq] ] etc.
             moves = selected_piece.possible_moves()
             color = selected_piece.get_color()
             rgb = None
 
+            # Display dots in color of current team
             if color == "R":
                 rgb = (255, 0, 0)
             else:
                 rgb = (0, 0, 255)
 
+            # For all possible moves, use check_move to filter out invalid moves
             for move in range(0, len(moves)):
 
                 end_pos = moves[move][-1]
                 check_move_result = self.check_move(selected_piece.get_pos(), end_pos)
 
+                # check_move returns a list if the move is valid
                 if type(check_move_result) == list:
+                    
                     # Plot the last/end position only
                     list_coords = self.translate_to_list_coords(end_pos)
+                    
+                    # Positions are 50px apart with a 50px offset/padding
                     x_pos = (list_coords[1] * 50) + 50
                     y_pos = (list_coords[0] * 50) + 50
+                    
                     pygame.draw.circle(win, rgb, (x_pos, y_pos), 5)
 
 class Piece():
@@ -888,7 +911,7 @@ class Piece():
 
         self._color = color
         self._pos = pos
-        self._role = "ge"
+        self._role = "ge"   # Note "ge" = Generic, not General ("GG")
 
     def __repr__(self):
         """Defines how the piece object is represented in the console. The general
@@ -978,79 +1001,108 @@ class Piece():
 
         return col_str + row_str
 
+    # ***** GUI/display related methods for pieces *****
+
     def calc_x_pos(self):
+        """Calculates the piece's current row position according to pixel coordinates."""
+        
+        # Get coordinates in [row, col] format
         pos = self.translate_to_list_coords(self.get_pos())
+        
+        # Extract row, convert to pixel position
         x_pos = (pos[1] * 50) + 50
+
         return x_pos
 
     def calc_y_pos(self):
+        """Calculates the piece's current column position according to pixel coordinates."""
+        
+        # Get coordinates in [row, col] format
         pos = self.translate_to_list_coords(self.get_pos())
+        
+        # Extract column, convert to pixel position
         y_pos = (pos[0] * 50) + 50
+        
         return y_pos
 
     def draw(self, win):
+        """Draws the appropriate graphical representation of the piece depending on
+        piece type to the PyGame window which is passed in as a parameter."""
+        
         if type(self) == General:
+            
             if self.get_color() == "R":
                 gen = pygame.image.load("images/RedGG.png")
                 pygame.Surface.blit(win, gen, (self.calc_x_pos() - 23, self.calc_y_pos() - 23))
+            
             if self.get_color() == "B":
                 gen = pygame.image.load("images/BlueGG.png")
                 pygame.Surface.blit(win, gen, (self.calc_x_pos() - 23, self.calc_y_pos() - 23))
 
         elif type(self) == Soldier:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedSO.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 14, self.calc_y_pos() - 14))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueSO.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 14, self.calc_y_pos() - 14))
 
         elif type(self) == Guard:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedGD.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 14, self.calc_y_pos() - 14))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueGD.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 14, self.calc_y_pos() - 14))
 
         elif type(self) == Chariot:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedCH.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueCH.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
 
         elif type(self) == Elephant:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedEL.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueEL.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
 
         elif type(self) == Horse:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedHO.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueHO.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
 
         elif type(self) == Cannon:
+            
             if self.get_color() == "R":
                 piece = pygame.image.load("images/RedCN.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
+            
             if self.get_color() == "B":
                 piece = pygame.image.load("images/BlueCN.png")
                 pygame.Surface.blit(win, piece, (self.calc_x_pos() - 22, self.calc_y_pos() - 22))
 
-
-        else:
-            pygame.draw.circle(win, (0, 0, 0), (self.calc_x_pos(), self.calc_y_pos()), 20)
-
-    def what_is_selected(self, win):
-        """Highlights a piece that is clicked on, displays the English name of the piece."""
+    def what_is_selected(self):
+        """Highlights a piece that is clicked on, returns the English name of the piece
+        for display on the PyGame screen/GUI."""
+        
         if type(self) == General:
             return "General"
 
@@ -1072,6 +1124,7 @@ class Piece():
         elif type(self) == Cannon:
             return "Cannon"
 
+# ***** Definitions for each type of game piece incl. each piece's move logic *****
 
 class Soldier(Piece):
     """Represents a Soldier piece in the game. Inherits from the Piece class.
@@ -1111,6 +1164,8 @@ class Soldier(Piece):
         possible_moves_alg = []
         possible_moves_final = []
 
+        # Red can only advance towards blue side or sideways, so the logic
+        # needs to be split up as "advancing" is opposite for each team
         if self.get_color() == "R":
             possible_moves.append([row + 1, col])
             possible_moves.append([row, col + 1])
@@ -1122,8 +1177,10 @@ class Soldier(Piece):
             # if the soldier's current position is d8, f8, or e9
             if pos == 'd8':
                 possible_moves.append([row + 1, col + 1])
+
             elif pos == 'f8':
                 possible_moves.append([row + 1, col - 1])
+
             elif pos == 'e9':
                 possible_moves.append([row + 1, col + 1])
                 possible_moves.append([row + 1, col - 1])
@@ -1140,8 +1197,10 @@ class Soldier(Piece):
             # if the soldier's current position is d3, f3, or e2
             if pos == 'd3':
                 possible_moves.append([row - 1, col + 1])
+
             elif pos == 'f3':
                 possible_moves.append([row - 1, col - 1])
+
             elif pos == 'e2':
                 possible_moves.append([row - 1, col + 1])
                 possible_moves.append([row - 1, col - 1])
@@ -1152,6 +1211,7 @@ class Soldier(Piece):
 
         # Check that the moves returned are within the board limits
         for i in range(len(possible_moves_alg)):
+
             if self.within_board(possible_moves_alg[i]):
                 possible_moves_final.append([possible_moves_alg[i]])
 
@@ -1216,17 +1276,23 @@ class Horse(Piece):
         possible_moves.append([[row + 1, col], [row + 2, col - 1]])     # 1D 1L
 
         for move in range(len(possible_moves)):
+
             temp = []
+
             for square in range(len(possible_moves[move])):
                 temp.append(self.translate_to_alg_coords(possible_moves[move][square]))
+
             possible_moves_alg.append(temp)
 
         # Check if any part of each possible move is outside the board
         for move in range(len(possible_moves_alg)):
+
             temp = []
+
             if self.within_board(possible_moves_alg[move][0]) and self.within_board(possible_moves_alg[move][1]):
                 temp.append(possible_moves_alg[move][0])
                 temp.append(possible_moves_alg[move][1])
+
             # Do not add empty lists to the results
             if temp:
                 possible_moves_final.append(temp)
@@ -1287,7 +1353,7 @@ class General(Piece):
         possible_moves_alg = []
         possible_moves_final = []
 
-        # Orthagonal moves for General
+        # Orthogonal moves for General
         possible_moves.append([row - 1, col])       # 1U
         possible_moves.append([row + 1, col])       # 1D
         possible_moves.append([row, col + 1])       # 1R
@@ -1296,12 +1362,16 @@ class General(Piece):
         # If in a pos where diagonal moves are possible within the Palace, add those
         if pos == 'd1' or pos == 'd8':
             possible_moves.append([row + 1, col + 1])     # 1D 1R
+
         elif pos == 'f1' or pos == 'f8':
             possible_moves.append([row + 1, col - 1])     # 1D 1L
+
         elif pos == 'd3' or pos == 'd10':
             possible_moves.append([row - 1, col + 1])     # 1U 1R
+
         elif pos == 'f3' or pos == 'f10':
             possible_moves.append([row - 1, col - 1])     # 1U 1L
+
         # Can move along any diagonal if in center of Palace
         elif pos == 'e2' or pos == 'e9':
             possible_moves.append([row + 1, col + 1])     # 1D 1R
@@ -1314,7 +1384,9 @@ class General(Piece):
 
         # When list of possible moves is generated, check on board AND in palace.
         for i in range(len(possible_moves_alg)):
+
             if self.within_board(possible_moves_alg[i]):
+
                 if self.in_palace(possible_moves_alg[i]):
                     possible_moves_final.append([possible_moves_alg[i]])
 
@@ -1388,41 +1460,61 @@ class Chariot(Piece):
 
         # Moving up (max move length = current row to 0 = # of current row)
         move_len_up = 1
+
         for i in range(0, row + 1):
+
             temp = []
+
             for j in range(1, move_len_up):
                 temp.append([row - j, col])
+
             move_len_up += 1
+
             if temp:
                 possible_moves.append(temp)
 
         # Moving down (max move length = current row to 9 = 9-current row)
         move_len_down = 1
+
         for i in range(0, (9 - row) + 1):
+
             temp = []
+
             for j in range(1, move_len_down):
                 temp.append([row + j, col])
+
             move_len_down += 1
+
             if temp:
                 possible_moves.append(temp)
 
         # Moving right (max move length = current col to i(8) = 8-current col)
         move_len_right = 1
+
         for i in range(0, (8 - col) + 1):
+
             temp = []
+
             for j in range(1, move_len_right):
                 temp.append([row, col + j])
+
             move_len_right += 1
+
             if temp:
                 possible_moves.append(temp)
 
         # Moving left (max move length = current col to a(0) = # of current col)
         move_len_left = 1
+
         for i in range(0, col + 1):
+
             temp = []
+
             for j in range(1, move_len_left):
                 temp.append([row, col - j])
+
             move_len_left += 1
+
             if temp:
                 possible_moves.append(temp)
 
@@ -1431,18 +1523,22 @@ class Chariot(Piece):
             first_step = [row + 1, col + 1]
             possible_moves.append([first_step])
             possible_moves.append([first_step, [row + 2, col + 2]])
+
         elif pos == 'f1' or pos == 'f8':
             first_step = [row + 1, col - 1]
             possible_moves.append([first_step])
             possible_moves.append([first_step, [row + 2, col - 2]])
+
         elif pos == 'd3' or pos == 'd10':
             first_step = [row - 1, col + 1]
             possible_moves.append([first_step])
             possible_moves.append([first_step, [row - 2, col + 2]])
+
         elif pos == 'f3' or pos == 'f10':
             first_step = [row - 1, col - 1]
             possible_moves.append([first_step])
             possible_moves.append([first_step, [row - 2, col - 2]])
+
         elif pos == 'e2' or pos == 'e9':
             possible_moves.append([[row - 1, col + 1]])   # 1U 1R
             possible_moves.append([[row - 1, col - 1]])   # 1U 1L
@@ -1451,9 +1547,12 @@ class Chariot(Piece):
 
         # Translate to alg space numbers
         for move in range(len(possible_moves)):
+
             temp = []
+
             for square in range(len(possible_moves[move])):
                 temp.append(self.translate_to_alg_coords(possible_moves[move][square]))
+
             possible_moves_alg.append(temp)
 
         # Above logic only generates spaces on board, do not need extra check
@@ -1546,17 +1645,24 @@ class Elephant(Piece):
         possible_moves.append([[row + 1, col], [row + 2, col - 1], [row + 3, col - 2]])  # 1D 2L
 
         for move in range(0, len(possible_moves)):
+
             temp = []
+
             for square in range(0, len(possible_moves[move])):
                 temp.append(self.translate_to_alg_coords(possible_moves[move][square]))
+
             possible_moves_alg.append(temp)
 
         # Check if any part of each possible move is outside the board
         for move in range(0, len(possible_moves_alg)):
+
             temp = []
+
             for square in range(0, len(possible_moves_alg[move])):
+
                 if self.within_board(possible_moves_alg[move][square]):
                     temp.append(possible_moves_alg[move][square])
+
             # Do not add incomplete lists to the results (Elephant can't execute
             # only part of its move, whole sequence has to be completed)
             if len(temp) >= 3:
