@@ -13,7 +13,7 @@ of other pieces on the board.
 <li>Blue always has the first turn</li>
 </ul>
 
-###Prerequisites:
+### Prerequisites:
 <ul>
 <li>Python 3</li>
 <li>PyGame</li>
